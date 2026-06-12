@@ -1,3 +1,6 @@
+import os
+from datetime import datetime
+
 from batm._batm import ffi, lib
 
 class Battery:
@@ -5,16 +8,26 @@ class Battery:
         self.updated: bool = False
         self.snap_ptr = ffi.new("struct batm_snap *")
         self.battery_name: str = battery_name
-        self.update()
+        if not self.update():
+            raise OSError(self._errno, os.strerror(self._errno), self.battery_name)
 
     def update(self) -> bool:
         if lib.batm_snap_update(ffi.NULL, self.battery_name.encode(), self.snap_ptr) == -1:
+            self._errno = ffi.errno
             self.updated = False
             return False
         self.updated = True
         return True
 
-    # attributes from metric functions
+    # access raw fields
+
+    def get_field(self, field: str) -> str | int:
+        val = getattr(self.snap_ptr, field)
+        if isinstance(val, int):
+            return val
+        return ffi.string(val).decode()
+
+    # attributes from metric functions (libbatm 0.1.x)
 
     @property
     def energy_rate(self) -> float:
@@ -48,13 +61,23 @@ class Battery:
 
     def __str__(self) -> str:
         return f"""
-energy_rate:        {round(self.energy_rate, 2)} W
-energy_full:        {round(self.energy_full, 2)} Wh
-energy_full_design: {round(self.energy_full_design, 2)} Wh
-soc:                {round(self.soc, 2)} %
-health:             {round(self.health, 2)} %
-time_to_full:       {round(self.time_to_full, 2)} Hrs
-time_to_empty:      {round(self.time_to_empty, 2)} Hrs
+                            Meta fields:
+meta_name:                  {self.get_field("meta_name")}
+meta_snap_time:             {datetime.fromtimestamp(self.get_field("meta_snap_time"))} 
+meta_scanned_fields_amt:    {self.get_field("meta_scanned_fields_amt")}
+                            Fields:
+manufacturer:               {self.get_field("manufacturer")}
+model_name:                 {self.get_field("model_name")}
+technology:                 {self.get_field("technology")}
+status:                     {self.get_field("status")}
+                            Metrics:
+energy_rate:                {round(self.energy_rate, 2)} W
+energy_full:                {round(self.energy_full, 2)} Wh
+energy_full_design:         {round(self.energy_full_design, 2)} Wh
+soc:                        {round(self.soc, 2)} %
+health:                     {round(self.health, 2)} %
+time_to_full:               {round(self.time_to_full, 2)} Hrs
+time_to_empty:              {round(self.time_to_empty, 2)} Hrs
 """
 
 

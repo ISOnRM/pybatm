@@ -15,13 +15,23 @@ your_python_project $ .venv/bin/python3
 True
 >>> print(bat)
 
-energy_rate:        0.0 W
-energy_full:        88.71 Wh
-energy_full_design: 90.0 Wh
-soc:                81.12 %
-health:             98.56 %
-time_to_full:       nan Hrs
-time_to_empty:      nan Hrs
+                            Meta fields:
+meta_name:                  BAT1
+meta_snap_time:             2026-06-12 11:56:38
+meta_scanned_fields_amt:    18
+                            Fields:
+manufacturer:               ASUS
+model_name:                 A32-K55
+technology:                 Li-ion
+status:                     Not charging
+                            Metrics:
+energy_rate:                0.0 W
+energy_full:                88.71 Wh
+energy_full_design:         90.0 Wh
+soc:                        81.12 %
+health:                     98.56 %
+time_to_full:               nan Hrs
+time_to_empty:              nan Hrs
 
 >>>
 ```
