@@ -88,4 +88,4 @@ ffibuilder.set_source(
 )
 
 if __name__ == "__main__":
-    _ = ffibuilder.compile(tmpdir="./src")
+    _ = ffibuilder.compile()
